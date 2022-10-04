@@ -28,7 +28,7 @@ const int PIN_RF_POWER_DISC = A1; // Low to pull down power rail to radio module
 // inputs from each microswitch in the lock - INT0, INT1 (2, 3)
 // Digital output to the keypad serial bus - 10 (Needs to be an output since it's the default SS pin for the SPI bus)
 
-const uint32_t STATE_TX_INTERVAL_S = 50000;//60 * 5; // Counted in watchdog intervals of 1 second
+const uint32_t STATE_TX_INTERVAL_S = 60 * 5; // 5 minutes, counted in watchdog intervals of 1 second
 
 
 RemotePacketEngine packet_engine(PIN_RF_SS, PIN_RF_CE, PIN_RF_POWER, PIN_RF_POWER_DISC);
@@ -53,9 +53,11 @@ uint16_t lock_state_update_counter = 0;
 bool time_to_tx_lock_state() {
     if (lock_state_update_counter++ > STATE_TX_INTERVAL_S) {
         lock_state_update_counter = 0;
+        return true;
     }
     return false;
 }
+bool force_tx_lock_state = false;
 
 void setup() {
     // Set up watchdog timer for 1s timeout interrupt
@@ -72,7 +74,9 @@ void setup() {
 
 void loop() {
     do_sleep();
-    if (lock_new_state_interrupt_triggered() || time_to_tx_lock_state()){
+    if (lock_new_state_interrupt_triggered() || time_to_tx_lock_state() || force_tx_lock_state){
+        if (force_tx_lock_state) do_sleep(); // If sending right away, give an extra second delay here
+        force_tx_lock_state = false;
         Serial.println("Sending lock state");
         packet_engine.send_message(current_lock_state());
     } else {
@@ -81,7 +85,7 @@ void loop() {
         if (packet_engine.try_recv_message()) {
             Serial.println("Got one!");
             send_keypad_command(packet_engine.received_data);
-            lock_state_update_counter = UINT16_MAX - 1; // Byass the counter and force an update next wakeup
+            force_tx_lock_state = true; // Force an update next wakeup
         }
     }
 }

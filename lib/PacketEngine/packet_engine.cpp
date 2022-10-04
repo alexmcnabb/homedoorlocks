@@ -54,6 +54,8 @@ bool test_and_decode_payload(uint32_t &received_data, uint8_t* message_buffer, u
                 received_data |= (message_buffer[1 + i] ^ hash_buffer[i]) << (8 * i);
             }
             return true;
+        } else {
+            Serial.print("Message authentication failed!");
         }
     }
     return false;
@@ -67,7 +69,7 @@ void RemotePacketEngine::init(uint32_t address) {
     pipe_address = address;
     // Don't bother initializing the radio here. We initialize the radio when turning it on to recieve or transmit
     if (HASH_TOKEN != EEPROM.readUint32(0)) {
-            Serial.println("Overwriting base hashs");
+            Serial.println("Overwriting base hashes!");
         EEPROM.writeArray(&BASE_HASH[0], 64, 4);
         EEPROM.writeUint32(HASH_TOKEN, 0);
     }
@@ -105,7 +107,7 @@ void BaseStationPacketEngine::init(uint32_t address) {
     rf75.setModeRX(17);
     for (int i = 0; i < REMOTE_COUNT; i++) {
         if (HASH_TOKENS[i] != EEPROM.readUint32(EEP_TOKEN_ADDRESS(i + 1))) {
-            Serial.println("Overwriting base hashes");
+            Serial.println("Overwriting base hashes!");
             EEPROM.writeArray(&BASE_HASHS[i][0], 64, EEP_KEY_ADDRESS_BASE_RECEIVE(i + 1));
             EEPROM.writeUint32(HASH_TOKENS[i], EEP_TOKEN_ADDRESS(i + 1));
         }

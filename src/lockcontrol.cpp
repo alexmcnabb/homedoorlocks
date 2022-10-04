@@ -12,41 +12,42 @@ The first 8 bits are specific to the button, the ninth bit is always 0
 
 We're Teed into the tx side of the bus with a 100k resistor on the keypad side and a 1k resistor on our side. When not transmitting, our output pin should be high-impedance
 
-For the limit microswitches, both switches are wired up to D2 and D3 (INT0, INT1)
-Only D3/INT1 is used, that's the one between the LOCK state and the intermediate middle state.
+For the limit microswitches, both switches are wired up to D2 and D3 (INT0, INT1).
 
-The PCB connects the serial TX line to D10, but that's the SS pin for the SPI module and so we can't use it as an input
+The original PCB connects the serial TX line to D10, but that's the SS pin for the SPI module and so we can't use it as an input, using A2 instead
 */
 
 enum {BUTTON_LOCK = 0x0E, BUTTON_12 = 0x01, BUTTON_34 = 0x02, BUTTON_56 = 0x03, BUTTON_78 = 0x04, BUTTON_90 = 0x05, TIMEOUT = 0xD4};
 
-volatile bool int_flag = false;
+volatile bool state = UNLOCK;
+volatile bool last_state = UNLOCK;
 void Int0_ISR() {
-    int_flag = true;
+    if (state == LOCK) state = UNLOCK;
+}
+void Int1_ISR() {
+    if (state == UNLOCK) state = LOCK;
 }
 
 void init_lock_control() {
-    attachInterrupt(INT1, Int0_ISR, CHANGE);
+    attachInterrupt(INT0, Int0_ISR, RISING);
+    attachInterrupt(INT1, Int1_ISR, RISING);
 }
 
 bool lock_new_state_interrupt_triggered() {
     // Call this after waking from an interrupt to see if the lock moved
-    bool new_state = int_flag;
-    int_flag = false;
-    return new_state;
+    bool state_is_updated = state != last_state;
+    last_state = state;
+    return state_is_updated;
 }
 
 uint8_t current_lock_state() {
-    delay(10); // For button debouncing
-    if (digitalRead(3)) { // INT0
+    if (state == LOCK) {
         Serial.println("Read lock is locked");
-        return LOCK;
     } else {
         Serial.println("Read lock is unlocked");
-        return UNLOCK;
     }
+    return state;
 }
-
 
 void send_bit(uint8_t bit) {
     if (bit) {
