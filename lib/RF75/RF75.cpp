@@ -115,7 +115,7 @@ void RF75::init(uint32_t address) {
         digitalWrite(POWER_PIN, HIGH);
 		digitalWrite(POWER_DESC_PIN, LOW);
 		pinMode(POWER_DESC_PIN, OUTPUT);
-        delayMicroseconds(200); // This seems long enough to get the supply voltage down to 50mv or so.
+        delayMicroseconds(600); // 200 seems long enough with 100n capacitance, 600 is enough for a 1u cap
 		pinMode(POWER_DESC_PIN, INPUT);
 		clearSS();
         digitalWrite(POWER_PIN, LOW);
