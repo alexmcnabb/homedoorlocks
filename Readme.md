@@ -26,24 +26,11 @@ Home Assistant Configuration Docs: https://www.home-assistant.io/integrations/lo
 
 
 
-
-# TODO:
-
-Rewrite hash storage to save seperate hashes for remote-base and base-remote communication, so that they can be kept in sync
-Update packet-engine readme to mention seperate hashes
-Current measurements - make sure we're still in a good range
-Put all code on git, check it out on the server
-Finish service wrapper for python code and get autostart working
-Finish mqtt code
-Add mqtt config to homeassistant
-Re-assemble lock with module and test end-to-end
-Fix printer lol
-Design and Print enclosures
-
-
-
 # PCB Changes to make - Lock module:
 - Connect lock serial TX line to A2 instead of pin 10 - Pin 10 needs to be an output since it's the default SS pin
 - Construct new power supply system for radio module. Current design is as follows:
-    100n cap at radio module VCC. Radio module VCC is connected to drain, source connected to Vin. Gate is connected to ground via 1M resistor, and to pin 5. Pin A1 is connected directly to the drain. A 47u cap is connected between Vin and ground.
+    1u and 100n caps at radio module VCC. Radio module VCC is connected to drain, source connected to Vin. Gate is connected to ground via 1M resistor, and to pin 5. Pin A1 is connected directly to the drain. A 47u cap is connected between Vin and ground.
     Currently using a TP2104 P Mosfet
+# PCB Changes to make - Base Station:
+- Add 100n cap to power rail at radio, 22uf cap to power rail
+- Add the option to cycle radio power from an IO pin like on the base station, with a jumper to bypass it
