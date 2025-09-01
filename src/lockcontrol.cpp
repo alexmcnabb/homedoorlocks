@@ -2,7 +2,7 @@
 #include "Arduino.h"
 
 const uint32_t DELAY_BUTTON = 150;
-const int PIN_SERIAL_TX = A2;
+const int PIN_SERIAL_TX = PIN_PC2;
 
 /*
 The keypad communicates over some kind of async serial bus. One sequence is transmitted on each button press, and another when it times out and switches the light off
@@ -22,10 +22,18 @@ enum {BUTTON_LOCK = 0x0E, BUTTON_12 = 0x01, BUTTON_34 = 0x02, BUTTON_56 = 0x03, 
 volatile bool state = UNLOCK;
 volatile bool last_state = UNLOCK;
 void Int0_ISR() {
-    if (state == LOCK) state = UNLOCK;
+    if (SWAPLU) {
+        if (state == LOCK) state = UNLOCK;
+    } else {
+        if (state == UNLOCK) state = LOCK;
+    }
 }
 void Int1_ISR() {
-    if (state == UNLOCK) state = LOCK;
+    if (SWAPLU) {
+        if (state == UNLOCK) state = LOCK;
+    } else {
+        if (state == LOCK) state = UNLOCK;
+    }
 }
 
 void init_lock_control() {

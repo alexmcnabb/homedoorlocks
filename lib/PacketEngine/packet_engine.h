@@ -7,7 +7,7 @@
 
 class BaseStationPacketEngine {
 public:
-	BaseStationPacketEngine(uint16_t sspin, uint16_t cepin);
+	BaseStationPacketEngine(uint16_t sspin, uint16_t cepin, uint16_t power_pin, uint16_t power_disc_pin);
 	void init(uint32_t address);
 	void send_message(uint8_t device_id, uint32_t data);
 	bool try_recv_message(); // See if message is available and receive it

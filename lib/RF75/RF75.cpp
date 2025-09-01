@@ -100,7 +100,7 @@ const uint8_t PROGMEM RFM73_bank1R0EInit[] = {
 	(0x20 | 0x0E), 0x41, 0x20, 0x08, 0x04, 0x81, 0x20, 0xCF, 0xF7, 0xFE, 0xFF, 0xFF
 };
 
-RF75::RF75(uint16_t sspin, uint16_t cepin, uint16_t power_pin, uint16_t power_desc_pin) : RF_PIN_SS(sspin), RF_PIN_CE(cepin), POWER_PIN(power_pin), POWER_DESC_PIN(power_desc_pin) {}
+RF75::RF75(uint16_t sspin, uint16_t cepin, uint16_t power_pin, uint16_t power_rail_pin) : RF_PIN_SS(sspin), RF_PIN_CE(cepin), POWER_PIN(power_pin), POWER_RAIL_PIN(power_rail_pin) {}
 
 void RF75::init(uint32_t address) {
 	pinMode(RF_PIN_SS, OUTPUT);
@@ -113,10 +113,11 @@ void RF75::init(uint32_t address) {
 		digitalWrite(13, LOW); // Set SCK and MOSI low while the radio is off so that they dont source any current
 		digitalWrite(11, LOW);
         digitalWrite(POWER_PIN, HIGH);
-		digitalWrite(POWER_DESC_PIN, LOW);
-		pinMode(POWER_DESC_PIN, OUTPUT);
+		digitalWrite(POWER_RAIL_PIN, LOW);
+		pinMode(POWER_RAIL_PIN, OUTPUT);
         delayMicroseconds(600); // 200 seems long enough with 100n capacitance, 600 is enough for a 1u cap
-		pinMode(POWER_DESC_PIN, INPUT);
+		pinMode(POWER_RAIL_PIN, INPUT);
+		// digitalWrite(POWER_RAIL_PIN, HIGH);
 		clearSS();
         digitalWrite(POWER_PIN, LOW);
 		SPI.begin();
@@ -225,8 +226,8 @@ void RF75::turnOff(){
 		SPI.end();
 		digitalWrite(13, LOW); // Set SCK and MOSI low while the radio is off so that they dont source any current
 		digitalWrite(11, LOW);
-		digitalWrite(POWER_DESC_PIN, LOW);
-		pinMode(POWER_DESC_PIN, OUTPUT);
+		digitalWrite(POWER_RAIL_PIN, LOW);
+		pinMode(POWER_RAIL_PIN, OUTPUT);
         digitalWrite(POWER_PIN, HIGH);
 	} else {
 		uint8_t val = readRegVal(RFM73_REG_CONFIG) & ~0x02;

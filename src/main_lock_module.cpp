@@ -20,10 +20,11 @@ Serial interface for debug: Connects to ftdi cable TX, RX and GND
 */
 
 // Pin connections
-const int PIN_RF_CE = 8;
-const int PIN_RF_SS = 9;
-const int PIN_RF_POWER = 5; // Low to enable power to the radio module
-const int PIN_RF_POWER_DISC = A1; // Low to pull down power rail to radio module, high impedance otherwise
+
+const int PIN_RF_CE = PIN_PB0;
+const int PIN_RF_SS = PIN_PB1;
+const int PIN_RF_POWER = PIN_PD5;
+const int PIN_RF_POWER_RAIL = PIN_PC1;
 // RF75 SPI SCK, MISO, MOSI
 // inputs from each microswitch in the lock - INT0, INT1 (2, 3)
 // Digital output to the keypad serial bus - 10 (Needs to be an output since it's the default SS pin for the SPI bus)
@@ -31,7 +32,7 @@ const int PIN_RF_POWER_DISC = A1; // Low to pull down power rail to radio module
 const uint32_t STATE_TX_INTERVAL_S = 60 * 5; // 5 minutes, counted in watchdog intervals of 1 second
 
 
-RemotePacketEngine packet_engine(PIN_RF_SS, PIN_RF_CE, PIN_RF_POWER, PIN_RF_POWER_DISC);
+RemotePacketEngine packet_engine(PIN_RF_SS, PIN_RF_CE, PIN_RF_POWER, PIN_RF_POWER_RAIL);
 
 ISR(WDT_vect) {}
 

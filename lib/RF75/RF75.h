@@ -6,7 +6,11 @@
 
 // sspin = CSN input = SPI slave select
 // cepin = CE input = Chip enable for RX/TX
-// power_pin = Power supply to radio. Active low. Set to zero to ignore.
+// power_pin = Enable for power supply to radio.
+// power_rail_pin = Power supply to radio - used to pull the rail down to zero to force a reset
+// Set power and power_disc pins to zero if not used
+
+// Currently the power rail pin is kept as an output when on, rather then being set high-z since the power transistor on the power_pin is broken.
 
 // The radio power pin will need a pulldown, as the radio will lock up the SPI bus otherwise.
 // The init(), turnOff() functions will manage power. Do not use turnOn()
@@ -19,7 +23,7 @@
 
 class RF75 {
 public:
-	RF75(uint16_t sspin, uint16_t cepin, uint16_t power_pin, uint16_t power_disc_pin);
+	RF75(uint16_t sspin, uint16_t cepin, uint16_t power_pin, uint16_t power_rail_pin);
 	void init(uint32_t address); // address is 3 bytes, msb should be zero
 	bool available(); // Returns true if something is in the RX fifo
 	void recievePacket(uint8_t *buff); // Length specified from setModeRX()
@@ -30,7 +34,7 @@ public:
 	void setModeRX(uint8_t payload_len); // Begin recieving data
 	uint8_t carrier_detect();
 private:
-	uint16_t RF_PIN_SS, RF_PIN_CE, POWER_PIN, POWER_DESC_PIN;
+	uint16_t RF_PIN_SS, RF_PIN_CE, POWER_PIN, POWER_RAIL_PIN;
 	void setCE();
 	void clearCE();
 	void setSS();
