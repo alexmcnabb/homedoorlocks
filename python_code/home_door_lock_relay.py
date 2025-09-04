@@ -12,10 +12,17 @@ UNLOCK_COMMAND = 0x01
 FRONTDOOR_ID = 0x00
 BACKDOOR_ID = 0x02
 
-port = Serial("/dev/serial/by-id/usb-SparkFun_SparkFun_Pro_Micro-if00", 115200)
+port = Serial("/dev/serial/by-id/usb-SparkFun_doorlock_basestation_-if00", 115200)
 
-def fprint(*args, **kwargs):
+in_forwarded_line = False
+def fprint(*args, forwarded=False, **kwargs):
+    global in_forwarded_line
     # Required when running as a service, prints won't come out right otherwise
+    if forwarded and not in_forwarded_line:
+        print("FromBaseStation: ", end="")
+        in_forwarded_line = True
+    if args and "\n" in args[0]:
+        in_forwarded_line = False
     print(*args, **kwargs)
     sys.stdout.flush()
 
@@ -47,18 +54,18 @@ def serial_input_loop():
             # TODO: this part
             if byte == LOCK_COMMAND | BACKDOOR_ID:
                 fprint("Got locked signal from backdoor lock!")
-                client.publish("home/frontdoor/state", "LOCK")
+                client.publish("home/locks/backdoor/state", "LOCK")
             elif byte == UNLOCK_COMMAND | BACKDOOR_ID:
                 fprint("Got unlocked signal from backdoor lock!")
-                client.publish("home/frontdoor/state", "UNLOCK")
+                client.publish("home/locks/backdoor/state", "UNLOCK")
             elif byte == LOCK_COMMAND | FRONTDOOR_ID:
                 fprint("Got locked signal from frontdoor lock!")
-                client.publish("home/frontdoor/state", "LOCK")
+                client.publish("home/locks/frontdoor/state", "LOCK")
             elif byte == UNLOCK_COMMAND | FRONTDOOR_ID:
                 fprint("Got unlocked signal from frontdoor lock!")
-                client.publish("home/frontdoor/state", "UNLOCK")
+                client.publish("home/locks/frontdoor/state", "UNLOCK")
             else:
-                fprint(chr(byte), end="")
+                fprint(chr(byte), end="", forwarded=True)
 
 serial_input_thread = Thread(target=serial_input_loop, daemon=True)
 serial_input_thread.start()

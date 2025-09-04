@@ -5,7 +5,7 @@ Description=Home Door Lock Relay Service
 Type=simple
 Restart=always
 RestartSec=1
-ExecStart=/home/alex/iot_code/homedoorlocks/python_code/home-door-lock-relay.py
+ExecStart=/home/alex/iot_code/homedoorlocks/python_code/run_home_door_lock_relay.sh
 
 [Install]
 WantedBy=multi-user.target
