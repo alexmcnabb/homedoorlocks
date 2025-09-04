@@ -1,3 +1,14 @@
+# Current Status:
+
+The system worked with modified V1 boards in Regina without issue
+
+I assembled the V2 boards, but couldn't reliably get it to run consistantly. Messages would either be dropped or arrive with corruption
+I tried adding 10uF caps to the radio power rail, but at that point something happened and I couldn't get em to communicate at all anymore
+
+Could try running with newer nrf24L01 modules, but hard to say if I can get genuine ones
+
+Best solution is probably redesign with nrf54x chips or something
+
 
 # System overview
 Converts a powered deadbolt into a home-assistant connected smart lock
@@ -42,6 +53,20 @@ The command topics are `home/locks/frontdoor/command` and `home/locks/backdoor/c
 The values sent should be either `LOCK` or `UNLOCK` on both topics.
 
 Home Assistant Configuration Docs: https://www.home-assistant.io/integrations/lock.mqtt/#full-configuration
+
+### Flashing basestation firmware from server:
+Copy file over:
+`scp .pio\build\baseStation\firmware.hex server:/home/alex/iot_code/homedoorlocks/python_code`
+Install Uploader program: https://github.com/vanbwodonk/leonardoUploader
+```
+git clone https://github.com/vanbwodonk/leonardoUploader.git
+cd leonardoUploader/linux
+make
+sudo make install
+sudo chmod +x /usr/local/bin/leonardoUploader  # Seem to need this for some reason
+leonardoUploader /dev/ttyACM0 firmware.hex
+```
+
 
 # PCB Issues:
 The transistor to enable radio power on both boards is wired with source/drain backwards, so it doesn't actually switch anything.

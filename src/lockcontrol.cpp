@@ -21,18 +21,28 @@ enum {BUTTON_LOCK = 0x0E, BUTTON_12 = 0x01, BUTTON_34 = 0x02, BUTTON_56 = 0x03, 
 
 volatile bool state = UNLOCK;
 volatile bool last_state = UNLOCK;
+
+const bool STATE_A = SWAPLU ? LOCK : UNLOCK;
+const bool STATE_B = SWAPLU ? UNLOCK : LOCK;
+
+volatile int isr0_hit = 0;
+volatile int isr1_hit = 0;
+
+volatile int isr0_trig = 0;
+volatile int isr1_trig = 0;
+
 void Int0_ISR() {
-    if (SWAPLU) {
-        if (state == LOCK) state = UNLOCK;
-    } else {
-        if (state == UNLOCK) state = LOCK;
+    isr0_hit++;
+    if (state == STATE_A) {
+        state = STATE_B;
+        isr0_trig++;
     }
 }
 void Int1_ISR() {
-    if (SWAPLU) {
-        if (state == UNLOCK) state = LOCK;
-    } else {
-        if (state == LOCK) state = UNLOCK;
+    isr1_hit++;
+    if (state == STATE_B) {
+        state = STATE_A;
+        isr1_trig++;
     }
 }
 
@@ -41,10 +51,24 @@ void init_lock_control() {
     attachInterrupt(INT1, Int1_ISR, RISING);
 }
 
+void check_counter(char* label, volatile int* counter) {
+    if (*counter) {
+        Serial.print(label);
+        Serial.println(*counter);
+        *counter = 0;
+    }
+}
+
 bool lock_new_state_interrupt_triggered() {
     // Call this after waking from an interrupt to see if the lock moved
     bool state_is_updated = state != last_state;
     last_state = state;
+    noInterrupts();
+    check_counter("ISR0Hit ", &isr1_hit);
+    check_counter("ISR1Hit ", &isr0_hit);
+    check_counter("ISR0Trig ", &isr1_trig);
+    check_counter("ISR1Trig ", &isr0_trig);
+    interrupts();
     return state_is_updated;
 }
 

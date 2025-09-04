@@ -13,6 +13,7 @@ public:
 	bool try_recv_message(); // See if message is available and receive it
 	uint32_t received_data; // filled in by try_recv_message if successful
 	uint8_t received_device_id;
+	void reboot_radio();
 private:
 	RF75 rf75;
 	uint32_t pipe_address;

@@ -14,6 +14,8 @@ const uint8_t DEV_ID_FRONT = 1;
 
 BaseStationPacketEngine packet_engine(PIN_RF_SS, PIN_RF_CE, PIN_RF_POWER, PIN_RF_POWER_RAIL);
 
+uint32_t last_radio_reset_time = 0;
+
 void setup() {
     Serial.begin(115200);
     while(!Serial) {;} // Wait for serial to be connected before operating
@@ -27,7 +29,16 @@ void loop() {
         uint8_t byte = Serial.read();
         Serial.print("Got byte from python: 0x");
         Serial.println(byte, HEX);
-        if (byte && 0b11111100) {
+        // Accept chars like this for debugging
+        if (byte == 'l') {
+            packet_engine.send_message(1, LOCK);
+            continue;
+        }
+        if (byte == 'u') {
+            packet_engine.send_message(1, UNLOCK);
+            continue;
+        }
+        if (byte & 0b11111100) {
             Serial.println("Invalid command, rejecting");
             continue;
         }
@@ -56,4 +67,11 @@ void loop() {
             Serial.write(payload | 0x00);
         }
     }
+
+    // Not sure if this is nessisary - can the radio get into a weird state?
+    // if (millis() - last_radio_reset_time > 10000) {
+    //     last_radio_reset_time = millis();
+    //     Serial.println("Rebooting Radio");
+    //     packet_engine.reboot_radio();
+    // }
 }

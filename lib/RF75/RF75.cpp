@@ -242,7 +242,8 @@ void RF75::turnOn(){
 	writeRegVal(RFM73_CMD_WRITE_REG | RFM73_REG_CONFIG, val);
 	activate();
 	writeRegVal(RFM73_CMD_WRITE_REG | RFM73_REG_FEATURE, 0x01); // This one gets cleared on power cycle I think
-	delay(2);
+	// delay(2);
+	delay(10);
 	selectBank(1);
 	writeRegBufPgm((uint8_t *)RFM73_cmd_tog1, sizeof(RFM73_cmd_tog1));
 	delayMicroseconds(20);

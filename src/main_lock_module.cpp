@@ -11,7 +11,7 @@ Lock connnector - 6 pin JST connector
     3 - B/W - Lock/Unlock microswitch
     4 - B   - Lock/Unlock microswitch
     5 - O/W - Ground
-    6 - O   - 3v3
+    6 - O   - 3v3 
 Serial interface for debug: Connects to ftdi cable TX, RX and GND
     Works with TTL-232R-3v3 cable or similar
     1 - BLK - Ground
